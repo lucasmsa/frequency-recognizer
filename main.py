@@ -2,7 +2,6 @@ from clientsClass import lucasLaptop
 from paramiko import SSHClient, AutoAddPolicy
 import simpleaudio as sa
  
- 
 # call for client
 ssh = SSHClient()
 ssh.set_missing_host_key_policy(AutoAddPolicy())
