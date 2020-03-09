@@ -8,13 +8,15 @@ import binascii
 import pyaudio
 
 class Encoder():
+    def __init__(self, file=None, message='', choice=0):
+        self.message = message 
+        with open(file, 'r') as f:
+            self.file = f.read()   
+        self.choice = choice
 
-    def __init__(self, message):
-        self.message = message    
-
-    def encodeString(self): 
+    def encodeString(self, toEnconde): 
         messageToBits = ba.bitarray()
-        messageToBits.frombytes(self.message.encode("utf-8"))
+        messageToBits.frombytes(toEnconde.encode("utf-8"))
         messageToBitsList = messageToBits.tolist()
         bitsMessage = ba.bitarray(messageToBitsList)
         
@@ -24,29 +26,29 @@ class Encoder():
         
         originalMessage = bitsMessage.tostring()
         
-        print( "\nmessage: " + str(self.message),
+        print( "\nmessage: " + str(toEnconde),
                "\nmessageToBits: " + str(messageToBits), 
                "\nbitsMessage: " + str(bitsMessage), 
                "\nstrBits: " + str(strBits),
-               "\nstrBitsToSting: " + str(bitsMessage.tostring()))
+               "\nstrBitsToString: " + str(bitsMessage.tostring()))
 
         return strBits
 
 
     def bitsToAudio(self):
-        frequency = 440
         fs = 8000
-        fs_2 = 48000
+        fs_2 = 22050
         seconds = 7
 
-        t = np.linspace(0, seconds, seconds * fs, False)
-
-        note = np.array(list(self.encodeString()), dtype=int)
+        if self.choice==0:
+            note = np.array(list(self.encodeString(self.file)), dtype=int)
+        else:
+            note = np.array(list(self.encodeString(self.message)), dtype=int)
 
         for bit in note:
 
-            audio = (2**15 - 1) / np.max(np.abs(bit + 1))
-            audio = audio.astype(np.int16)
+            audio = (2**31 - 1) / np.max(np.abs(bit + 1))
+            audio = audio.astype(np.int32)
 
             if bit == 0:
                 playObj = sa.play_buffer(audio, 1, 2, fs)
@@ -57,9 +59,7 @@ class Encoder():
             playObj.wait_done()
             time.sleep(1)
 
-
         return note
-        
 
-msgEncode = Encoder("tomar no cu")
+msgEncode = Encoder("commands.txt")
 print(msgEncode.bitsToAudio())
