@@ -3,6 +3,9 @@ import pyaudio
 import wave
 import numpy as np
 import simpleaudio as sa
+import time
+import binascii
+import pyaudio
 
 class Encoder():
 
@@ -31,9 +34,9 @@ class Encoder():
 
 
     def bitsToAudio(self):
-
         frequency = 440
-        fs = 44100
+        fs = 8000
+        fs_2 = 48000
         seconds = 7
 
         t = np.linspace(0, seconds, seconds * fs, False)
@@ -42,13 +45,21 @@ class Encoder():
 
         for bit in note:
 
-            audio = bit * (2**15 - 1) / np.max(np.abs(bit))
+            audio = (2**15 - 1) / np.max(np.abs(bit + 1))
             audio = audio.astype(np.int16)
-            playObj = sa.play_buffer(audio, 1, 2, fs)
+
+            if bit == 0:
+                playObj = sa.play_buffer(audio, 1, 2, fs)
+
+            elif bit == 1:
+                playObj = sa.play_buffer(audio, 1, 2, fs_2)
+                
             playObj.wait_done()
+            time.sleep(1)
+
 
         return note
         
 
-msgEncode = Encoder("Message sent")
+msgEncode = Encoder("tomar no cu")
 print(msgEncode.bitsToAudio())
