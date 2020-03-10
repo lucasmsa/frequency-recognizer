@@ -65,15 +65,20 @@ class Decoder:
                 dataNP = np.array(dataToInt, dtype='b')[::2] + 128
 
                 line.set_ydata(dataNP)
-                
+
                 y_fft = fft(dataToInt)
-                line_fft.set_ydata(np.abs(y_fft[0:chunk]) * 2 / (256 * chunk))
+                treatedSignalCalculus = np.abs(y_fft[0:chunk]) * 2 / (256 * chunk)
+                line_fft.set_ydata(treatedSignalCalculus)
 
                 fig.canvas.draw()
                 fig.canvas.flush_events()
+
+                #filteredDataPeaks = signal.find_peaks(np.abs(y_fft[0:chunk]) * 2 / (256 * chunk), threshold=20)[0]
+                filteredDataPeaks = signal.find_peaks_cwt(treatedSignalCalculus, widths=np.ones(treatedSignalCalculus.shape)*2)-1
+                print(max(filteredDataPeaks))
                 #time.sleep(0.05)
 
-            except(Exception):
+            except KeyboardInterrupt:
 
                 print('End recording session')            
 
@@ -100,35 +105,13 @@ class Decoder:
             data = stream.read(1024)
             samples = np.fromstring(data, dtype=aubio.float_type)
             pitch = pDetection(samples)[0]
-            """ 
-            # Compute Fourier transform of windowed signal
-            # windowed = data * blackmanharris(len(data))
-            windowed = np.array(len(data)) * blackmanharris(len(data))
-            f = np.fft.rfft(windowed)
-            print(f)
-
-            # Find the peak and interpolate to get a more accurate peak
-            i = np.argmax(abs(f))  # Just use this for less-accurate, naive version
-            true_i = parabolic.Trapezoidal(np.log(abs(f)), i)[0]
-
-            # Convert to equivalent frequency
-            print(f'frequency: {44100 * true_i / len(windowed)}') """
-
-            # Compute the energy (volume) of the
-            # current frame.
-            volume = np.sum(samples**2)/len(samples)
-            # Format the volume output so that at most
-            # it has six decimal numbers.
-            volume = "{:.6f}".format(volume)
 
             if pitch >= 1550:
                 bitsDecoded.append(0)
             elif pitch > 200:
                 bitsDecoded.append(1)
 
-
             print(pitch)
-            #print(volume)
             print(f'Message\'s bits: {bitsDecoded}')
 
 
