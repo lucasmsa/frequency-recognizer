@@ -5,6 +5,7 @@ import numpy as np
 import parabolic
 import struct
 from scipy import signal
+from scipy.fftpack import fft
 import matplotlib.pyplot as plt
 import time
 
@@ -26,6 +27,10 @@ class Decoder:
 
         p = pyaudio.PyAudio()  # Create an interface to PortAudio
 
+        plt.ion()
+            
+        fig, (ax, ax2) = plt.subplots(2, figsize=(15, 8))
+
         print('Recording')
 
         stream = p.open(format=sample_format,
@@ -36,65 +41,43 @@ class Decoder:
                         frames_per_buffer=chunk,
                         )
         
-        figure, axis = plt.subplots()
+        x = np.arange( 0, 2 * chunk, 2)
+        x_fft = np.linspace(0, fs, chunk)
+
+        line, = ax.plot(x, np.random.rand(chunk), '-', lw=2)
+        line_fft, = ax2.semilogx(x_fft, np.random.rand(chunk), '-', lw=2) 
+
         
-        x = np.arrange( 0, 2 * chunk, 2)
-        line, = axis.plot(x, np.random.rand(chunk))
-        
+        ax.set_title('Audio received from microphone')
+        ax.set_xlabel('samples')
+        ax.set_ylabel('volume')
+        ax.set_ylim(0, 256)
+        ax.set_xlim(0, 2 * chunk)
+        #plt.setp(ax, xticks=[0, chunk, 2*chunk], yticks=[0, 128, 256])
+
+        ax2.set_xlim(20, fs / 2)
+
         while True:
-            data = stream.read(chunk)
+            try:
+                data = stream.read(chunk)
+                
+                dataToInt = struct.unpack(str(2 * chunk) + 'B', data)
+                dataNP = np.array(dataToInt, dtype='b')[::2] + 128
 
-            dataToInt = np.array(struct.unpack(str(2 * chunk) + 'B', data), dtype='b')[::2] + 127
-            line.set_ydata(dataToInt)
-            figure.canvas.draw()
-            figure.canvas.flush_events()
+                line.set_ydata(dataNP)
+                
+                y_fft = fft(dataToInt)
+                line_fft.set_ydata(np.abs(y_fft[0:chunk]) * 2 / (256 * chunk))
 
-        """ frames = []  # Initialize array to store frames
-        data = stream.read(chunk)
-        # Store data in chunks for 10 seconds
-        for i in range(0, int(fs / chunk * seconds)):
-            print(len(data))
+                fig.canvas.draw()
+                fig.canvas.flush_events()
+                #time.sleep(0.05)
 
+            except(Exception):
 
-            #stream.write(data)
+                print('End recording session')            
 
-            indata = np.array(len(data)/swidth)*window
-
-            # Take the fft and square each value
-            fftData=abs(np.fft.rfft(indata))**2
-            # find the maximum
-            which = fftData[1:].argmax() + 1
-            # use quadratic interpolation around the max
-            if which != len(fftData)-1:
-                y0,y1,y2 = np.log(fftData[which-1:which+2:])
-                x1 = (y2 - y0) * .5 / (2 * y1 - y2 - y0)
-                # find the frequency and output it
-                thefreq = (which+x1)*fs/chunk
-                print(f"The freq is {thefreq} Hz.")
-            else:
-                thefreq = which*fs/chunk
-                print(f"The freq is {thefreq} Hz.")
-            # read some more data
-            data = stream.read(chunk)
-            frames.append(data)
-            
-
-        # Stop and close the stream 
-        stream.write(data)
-        stream.stop_stream()
-        stream.close()
-        # Terminate the PortAudio interface
-        p.terminate()
-
-        print('Finished recording')
-
-        # Save the recorded data as a WAV file
-        wf = wave.open('audio/audio-decoded.wav', 'wb')
-        wf.setnchannels(channels)
-        wf.setsampwidth(p.get_sample_size(sample_format))
-        wf.setframerate(fs)
-        wf.writeframes(b''.join(frames))
-        wf.close() """
+     
 
     def pitchDetection(self):
         # PyAudio object.
