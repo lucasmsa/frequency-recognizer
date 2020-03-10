@@ -37,13 +37,17 @@ class Encoder():
 
     def bitsToAudio(self):
         fs = 8000
-        fs_2 = 22050
-        seconds = 7
+        fs_2 = 11025
 
         if self.choice==0:
             note = np.array(list(self.encodeString(self.file)), dtype=int)
         else:
             note = np.array(list(self.encodeString(self.message)), dtype=int)
+
+        # audio = 2147483647 / np.max(np.abs(1))
+        # audio = audio.astype(np.int32)
+        # playObj = sa.play_buffer(audio, 1, 2, 32000)
+        # time.sleep(1)
 
         for bit in note:
 
@@ -57,9 +61,14 @@ class Encoder():
                 playObj = sa.play_buffer(audio, 1, 2, fs_2)
                 
             playObj.wait_done()
-            time.sleep(1)
+            time.sleep(0.5)
 
+        # time.sleep(0.5)
+        # audio = 2147483647 / np.max(np.abs(1))
+        # audio = audio.astype(np.int32)
+        # playObj = sa.play_buffer(audio, 1, 2, 48000)
+        
         return note
 
-msgEncode = Encoder("commands.txt")
+msgEncode = Encoder("commands.txt", 'po', 1)
 print(msgEncode.bitsToAudio())
