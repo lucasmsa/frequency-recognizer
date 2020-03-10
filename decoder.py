@@ -74,8 +74,12 @@ class Decoder:
                 fig.canvas.flush_events()
 
                 #filteredDataPeaks = signal.find_peaks(np.abs(y_fft[0:chunk]) * 2 / (256 * chunk), threshold=20)[0]
-                filteredDataPeaks = signal.find_peaks_cwt(treatedSignalCalculus, widths=np.ones(treatedSignalCalculus.shape)*2)-1
-                print(max(filteredDataPeaks))
+                ''' filteredDataPeaks = signal.find_peaks_cwt(y_fft, widths=np.ones(y_fft.shape)*2)-1
+                print(max(filteredDataPeaks)) '''
+
+                peaks, _ = signal.find_peaks(treatedSignalCalculus)
+                prominences = signal.peak_prominences(treatedSignalCalculus, peaks)[0]
+                print(max(prominences))
                 #time.sleep(0.05)
 
             except KeyboardInterrupt:
