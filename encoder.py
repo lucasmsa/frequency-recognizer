@@ -2,6 +2,9 @@ import bitarray as ba
 import pyaudio
 import wave
 import numpy as np
+from pysine import sine
+import itertools
+import sys
 import simpleaudio as sa
 import time
 import binascii
@@ -10,7 +13,7 @@ import pyaudio
 class Encoder():
     def __init__(self, file=None, message='', choice=0):
         self.message = message 
-        with open(file, 'r') as f:
+        with open(file, 'rb') as f:
             self.file = f.read()   
         self.choice = choice
 
@@ -36,28 +39,24 @@ class Encoder():
 
 
     def bitsToAudio(self):
-        fs = 8000
-        fs_2 = 11025
+        fs = 7000
+        fs_2 = 18500
 
-        if self.choice==0:
+        if self.choice == 0:
             note = np.array(list(self.encodeString(self.file)), dtype=int)
         else:
             note = np.array(list(self.encodeString(self.message)), dtype=int)
 
         for bit in note:
 
-            audio = (2**31 - 1) / np.max(np.abs(bit + 1))
-            audio = audio.astype(np.int32)
-
             if bit == 0:
-                playObj = sa.play_buffer(audio, 1, 2, fs)
+                sine(frequency=fs, duration=2)
 
             elif bit == 1:
-                playObj = sa.play_buffer(audio, 1, 2, fs_2)
-                
-            playObj.wait_done()
+                sine(frequency=fs_2, duration=2)
+
             time.sleep(0.5)
-        
+
         return note
 
 msgEncode = Encoder("commands.txt", 'po', 1)
