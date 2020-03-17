@@ -50,12 +50,12 @@ class Encoder():
         for bit in note:
 
             if bit == 0:
-                sine(frequency=fs, duration=2)
+                sine(frequency=fs, duration=0.295)
 
             elif bit == 1:
-                sine(frequency=fs_2, duration=2)
+                sine(frequency=fs_2, duration=0.295)
 
-            time.sleep(0.5)
+            #time.sleep(0.5)
 
         return note
 
