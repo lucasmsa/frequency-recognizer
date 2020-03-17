@@ -5,7 +5,7 @@ class Decoder:
     
     def decodeSound(self):
         
-        chunk = 16384  # Record in chunks of 1024 samples
+        chunk = 12000 # Record in chunks of 1024 samples
         sample_format = pyaudio.paInt16  # 16 bits per sample
         channel = 1
         fs = 44100  # Record at 44100 samples per second 
@@ -43,7 +43,6 @@ class Decoder:
         ax.set_ylabel('volume')
         ax.set_ylim(0, 256)
         ax.set_xlim(0, 2 * chunk)
-        #plt.setp(ax, xticks=[0, chunk, 2*chunk], yticks=[0, 128, 256])
 
         ax2.set_xlim(20, fs / 2)
         
@@ -51,7 +50,7 @@ class Decoder:
 
         while True:
             try:
-            
+                start = time.time()
                 data = stream.read(chunk)
                 dataToInt = struct.unpack(str(2 * chunk) + 'B', data)
                 dataNP = np.array(dataToInt, dtype='b')[::2] + 128
@@ -71,30 +70,37 @@ class Decoder:
                 peaks, _ = signal.find_peaks(treatedSignalCalculus)
                 prominences = signal.peak_prominences(treatedSignalCalculus, peaks)[0]
                 frequencies = signal.peak_prominences(treatedSignalCalculus, peaks)[1]
-                
-                indexPeak = list(prominences).index(max(sorted(prominences[4000:])))
-                frequency_range = frequencies[indexPeak]
-                print(f'Index peak: {indexPeak} -- x value of peak: {frequency_range} -- prominences[indexPeak]: {prominences[indexPeak]} \n')
+                print(len(prominences), len(frequencies))
 
-                frequency_range = frequencies[indexPeak]
-
-
-                if prominences[indexPeak] > 0.1 and frequency_range > 7000:
-
+                end = time.time()
+                print(f'Time: {end - start}')
+                try:
                     
-                    print(f'Frequency -> {frequency_range}')
-                    
-                    if frequency_range < 9000 and frequency_range > 7000:
-                        print(f'BIT: 0 -> {frequencies[indexPeak]}')
+                    print(f'max index -> {list(prominences).index(max(prominences))}')
+
+                    max_index = list(prominences).index(max(prominences[580:1000]))
+
+                    if max_index >= 600 and max_index <= 670 and prominences[max_index] > 0.05:
+
+                        frequency_range = frequencies[max_index]
+
+                        print(f'BIT: 0 -> {frequency_range}')
                         bitsDecoder.append(0)
-                        time.sleep(0.1)                   
+                        #time.sleep(0.075)
+
+                    elif max_index >= 880 and max_index <= 950 and prominences[max_index] > 0.05:
                         
-                    elif frequency_range >= 14000:
-                        print(f'BIT: 1 -> {frequencies[indexPeak]}')
-                        bitsDecoder.append(1) 
-                        time.sleep(0.1)                  
+                        frequency_range = frequencies[max_index]
+
+                        print(f'BIT: 1 -> {frequency_range}')
+                        bitsDecoder.append(1)  
+                        #time.sleep(0.075)             
 
                     print(f'Bits Decoded : {bitsDecoder}')
+
+                except ValueError:
+                    print(f'Problema, provavelmente o chunk ¯\_(ツ)_/¯')
+                
 
             except KeyboardInterrupt:
                 fig.End()
