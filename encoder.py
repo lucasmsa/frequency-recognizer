@@ -40,7 +40,7 @@ class Encoder():
 
     def bitsToAudio(self):
         fs = 7000
-        fs_2 = 18500
+        fs_2 = 12000
 
         if self.choice == 0:
             note = np.array(list(self.encodeString(self.file)), dtype=int)
@@ -50,10 +50,10 @@ class Encoder():
         for bit in note:
 
             if bit == 0:
-                sine(frequency=fs, duration=0.295)
+                sine(frequency=fs, duration=0.285)
 
             elif bit == 1:
-                sine(frequency=fs_2, duration=0.295)
+                sine(frequency=fs_2, duration=0.285)
 
             #time.sleep(0.5)
 
