@@ -74,27 +74,30 @@ class Decoder:
 
                 end = time.time()
                 print(f'Time: {end - start}')
+
                 try:
                     
                     print(f'max index -> {list(prominences).index(max(prominences))}')
 
                     max_index = list(prominences).index(max(prominences[580:1000]))
 
-                    if max_index >= 600 and max_index <= 670 and prominences[max_index] > 0.05:
+                    print(f'Frequencies: {max_index}')
+                    print(f'Max_prominences: {prominences[max_index]}')
+
+                    if max_index >= 600 and max_index <= 670 and prominences[max_index] > 0.1:
 
                         frequency_range = frequencies[max_index]
 
                         print(f'BIT: 0 -> {frequency_range}')
                         bitsDecoder.append(0)
-                        #time.sleep(0.075)
 
-                    elif max_index >= 880 and max_index <= 950 and prominences[max_index] > 0.05:
+                    elif max_index >= 700 and max_index <= 770 and prominences[max_index] > 0.05:
                         
                         frequency_range = frequencies[max_index]
 
                         print(f'BIT: 1 -> {frequency_range}')
                         bitsDecoder.append(1)  
-                        #time.sleep(0.075)             
+                                     
 
                     print(f'Bits Decoded : {bitsDecoder}')
 
